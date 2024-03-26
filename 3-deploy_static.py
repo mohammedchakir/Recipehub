@@ -1,11 +1,7 @@
-#!/usr/bin/python3
-"""
-Fabric script that creates and distributes an archive to your web servers
-"""
 import re
 import tarfile
 import os.path
-from fabric.api import *
+from fabric import *
 from datetime import datetime
 
 env.user = 'ubuntu'
@@ -26,14 +22,7 @@ def do_pack():
 
 
 def do_deploy(archive_path):
-    """Distributes an archive to both of webservers 01 & 02.
-
-    Args:
-        archive_path (str): Path of archive to distribute.
-    Returns:
-        If the file doesn't exist at archive_path or an error apears - False.
-        Otherwise - True.
-    """
+    """Distributes an archive to both of webservers 01 & 02."""
     if os.path.exists(archive_path) is False:
         return False
     try:

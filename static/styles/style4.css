@@ -345,7 +345,7 @@ strong {
   font-size: var(--h4-font-size);
   font-weight: var(--font-weight-bold);
   display: block;
-  color: var(--white-color);
+  color: #f8f6f5;
 }
 
 .navbar-brand-image {
@@ -528,10 +528,7 @@ strong {
   border-radius: var(--border-radius-medium);
   content: "";
   position: absolute;
-  top: 55%;
-  left: 50%;
-  transform: translate(-55%, -50%) rotate(45deg);
-  width: 250px;
+  width: 650px;
   height: 350px;
   pointer-events: none;
 }
@@ -543,7 +540,7 @@ strong {
 }
 
 .hero-section h1 {
-  color: var(--white-color);
+  color: #ff9507;
 }
 
 .small-text {
@@ -1184,29 +1181,5 @@ strong {
   .timeline-container-right::before {
     top: 13px;
   }
-}
-.popup {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: rgba(0, 0, 0, 0.5);
-  padding: 20px;
-  border-radius: 5px;
-  z-index: 9999;
-}
-
-.popup-content {
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 5px;
-  position: relative;
-}
-
-.close {
-  position: absolute;
-  top: 5px;
-  right: 10px;
-  cursor: pointer;
 }
 

@@ -1,8 +1,4 @@
-#!/usr/bin/python3
-"""
-Fabric script that distributes an archive to your web servers
-"""
-from fabric.api import env, run, put
+from fabric import env, run, put
 import os
 from datetime import datetime
 
@@ -12,14 +8,7 @@ env.key_filename = ['~/.ssh/school']
 
 
 def do_deploy(archive_path):
-    """Distributes an archive to both of webservers 01 & 02.
-
-    Args:
-        archive_path (str): Path of archive to distribute.
-    Returns:
-        If the file doesn't exist at archive_path or an error apears - False.
-        Otherwise - True.
-    """
+    """Distributes an archive to both of webservers 01 & 02."""
     if os.path.isfile(archive_path) is False:
         return False
     file = archive_path.split("/")[-1]
