@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>View Order Details</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Custom CSS styles */
+        .side-panel {
+            background-color: orange;
+            padding: 20px;
+            height: 100vh; /* Set the side panel to full viewport height */
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        .customer-image {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .main-content {
+            padding: 20px;
+        }
+
+        /* Style the table for better appearance */
+        .table th, .table td {
+            text-align: center;
+        }
+
+        .table th {
+            background-color: #f8f9fa; /* Light gray background for table headers */
+        }
+
+        /* Style the buttons */
+        .btn-primary, .btn-danger {
+            padding: 5px 15px;
+        }
+
+        /* Style the pop-up */
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            border: 1px solid #ccc;
+            padding: 15px;
+            z-index: 1;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Side Panel -->
+            <div class="col-md-3 side-panel">
+                <div class="text-center mb-3">
+                    <img src="{{url_for('static', filename='customer.png')}}" alt="Customer Image" class="img-fluid rounded-circle" style="width: 150px; height: 150px;">
+                    <h5>Customer {{ user_details[0] }}</h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><a href="/customer-dashboard">Dashboard</a></li>
+                    <li class="list-group-item"><a href="/order-food">Order Food</a></li>
+                    <li class="list-group-item"><a href="/view-order">View Your Orders</a></li>
+                    <li class="list-group-item"><a href="/view-receipts">View Payment Receipts</a></li>
+                    <li class="list-group-item"><a href="/view-bill">View Bill</a></li>
+                    <li class="list-group-item"><a href="/sign-out">Sign Out</a></li>
+                </ul>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-9 p-4">
+                <div id="customer-dashboard">
+                    <h2 class="mb-4">Welcome, {{ user_details[0] }}</h2>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <p><strong>Full Name:</strong></p>
+                        </div>
+                        <div class="col-md-8">
+                            <p>{{ user_details[0] }}</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <p><strong>Mobile Number:</strong></p>
+                        </div>
+                        <div class="col-md-8">
+                            <p>{{ user_details[1] }}</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <p><strong>Address:</strong></p>
+                        </div>
+                        <div class="col-md-8">
+                            <p>{{ user_details[2] }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

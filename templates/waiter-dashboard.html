@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Waiter Dashboard</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Add CSS styles for the side panel */
+        .side-panel {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            width: 250px; /* Increased width */
+            background: linear-gradient(135deg, #87CEEB, #00BFFF); /* Gradient background */
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            padding: 20px;
+            box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .waiter-image {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px; /* Adjust the spacing as needed */
+            width: 150px;
+            height: 150px;
+            border-radius: 50%; /* Make the image circular */
+        }
+
+        /* Style for side panel links */
+        .side-panel a {
+            display: block;
+            color: #fff; /* White text color */
+            padding: 10px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .side-panel a:hover {
+            background-color: #0099CC; /* Lighter blue on hover */
+        }
+
+        /* Custom button styles */
+        .custom-btn {
+            background-color: #007BFF; /* Custom primary color */
+            color: #fff;
+            padding: 12px 20px;
+        }
+
+        .custom-btn-danger {
+            background-color: #DC3545; /* Custom danger color */
+        }
+
+        /* Adjust margin for the main content */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            margin-left: 280px; /* Increase left margin to accommodate the wider side panel */
+            padding: 20px;
+        }
+
+        /* Style for font-weight-bold class in the main content */
+        .font-weight-bold {
+            font-weight: bold;
+            margin: 0;
+        }
+        
+        /* Style for the values in the main content */
+        .main-content p {
+            margin: 0;
+        }
+        /* Reduce spacing between table columns */
+        .main-content table td {
+            padding-right: 1px; /* Adjust this value to reduce or increase the spacing */
+        }
+
+        /* Center the table and set a fixed width */
+        .table-container {
+            max-width: 50%; /* Adjust this value to set the desired width */
+            margin: 0 ;
+        }
+
+        /* Reduce spacing between table columns */
+        .table-container table td {
+            padding-right: 60px; /* Adjust this value to control the spacing */
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="side-panel">
+        <img src="{{url_for('static', filename='waiter.JPG')}}" alt="Waiter Image" class="waiter-image">
+        <h5 class="text-white">Waiter {{ waiter_details[0] }}</h5>
+        <a class="custom-btn" href="/waiter-dashboard">Dashboard</a>
+        <a class="custom-btn" href="/view-calls">View Chef Calls</a>
+        <a class="custom-btn" href="/waiter-serves">Serve Food</a>
+        <a class="custom-btn custom-btn-danger" href="/waiter-sign-out">Sign Out</a>
+    </div>
+
+    <div class="main-content">
+        <h2 class="text-dark">Welcome, {{ waiter_details[0] }}</h2>
+        <div class="container mt-4">
+            <table class="table">
+                <tr>
+                    <th class="font-weight-bold" scope="row">Full Name:</th>
+                    <td>{{ waiter_details[0] }}</td>
+                </tr>
+                <tr>
+                    <th class="font-weight-bold" scope="row">Mobile Number:</th>
+                    <td>{{ waiter_details[1] }}</td>
+                </tr>
+                <tr>
+                    <th class="font-weight-bold" scope="row">Address:</th>
+                    <td>{{ waiter_details[2] }}</td>
+                </tr>
+            </table>
+        </div>
+        <!-- Your waiter dashboard content goes here -->
+    </div>
+    
+</body>
+
+</html>

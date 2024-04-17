@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Served Food</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Add CSS styles for the side panel */
+        .side-panel {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            width: 250px; /* Increased width */
+            background: linear-gradient(135deg, #87CEEB, #00BFFF); /* Gradient background */
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            padding: 20px;
+            box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .waiter-image {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px; /* Adjust the spacing as needed */
+            width: 150px;
+            height: 150px;
+            border-radius: 50%; /* Make the image circular */
+        }
+
+        /* Style for side panel links */
+        .side-panel a {
+            display: block;
+            color: #fff; /* White text color */
+            padding: 10px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .side-panel a:hover {
+            background-color: #0099CC; /* Lighter blue on hover */
+        }
+
+        /* Custom button styles */
+        .custom-btn {
+            background-color: #007BFF; /* Custom primary color */
+            color: #fff;
+            padding: 12px 20px;
+        }
+
+        .custom-btn-danger {
+            background-color: #DC3545; /* Custom danger color */
+        }
+
+        /* Adjust margin for the main content */
+        .main-content {
+            margin-left: 280px; /* Increase left margin to accommodate the wider side panel */
+            padding: 20px;
+        }
+        
+    </style>
+</head>
+
+<body>
+    <div class="side-panel">
+        <img src="{{url_for('static', filename='waiter.JPG')}}" alt="Waiter Image" class="waiter-image">
+        <h5 class="text-white">Waiter {{ waiter_details[0] }}</h5>
+        <a class="custom-btn" href="/waiter-dashboard">Dashboard</a>
+        <a class="custom-btn" href="/view-calls">View Chef Calls</a>
+        <a class="custom-btn" href="/waiter-serves">Serve Food</a>
+        <a class="custom-btn custom-btn-danger" href="/waiter-sign-out">Sign Out</a>
+    </div>
+
+    <div class="main-content">
+        <h2 class="text-dark">Serves to be done</h2>
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Table No.</th>
+                    <th>Customer</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="serve-detail-table">
+                {% for serve in serve_details %}
+                <tr>
+                    <td>{{ serve.order_id }}</td>
+                    <td>{{ serve.table_no }}</td>
+                    <td>{{ serve.full_name }}</td>
+                    <td>
+                        <button id="serve-status-btn" onclick="serve('{{ serve.order_id }}', this)">Mark Served</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        async function fetchServesByWaiters() {
+            try {
+                const response = await fetch('/get-serves-by-waiters');
+                const data = await response.json();
+        
+                if (data.servedOrders) {
+                    // Store the list of undertaken orders in the variable
+                    ordersServedByWaiters = data.servedOrders.map(order => order.order_id);
+                    console.log(ordersServedByWaiters);
+        
+                    // Check each order in the table
+                    const rows = document.querySelectorAll("#serve-detail-table tr");
+                    rows.forEach(row => {
+                        const orderId = row.cells[0].textContent;
+                        if (ordersServedByWaiters.includes(orderId)) {
+                            // Order has been undertaken by a chef
+                            // Replace the "Undertake Order" button with text
+                            // const undertakeOrderButton = row.querySelector(".undertake-order");
+                            // undertakeOrderButton.style.display = 'none';
+                            // const waiterName = data.servedOrders.find(order => order.order_id === orderId).waiter_name;
+                            // row.insertCell(5).textContent = ' Waiter '+waiterName+' is coming to take the order';
+
+                            const servedButton=document.getElementById("serve-status-btn");
+                            const servedText = document.createElement('span');
+                            servedText.textContent = 'Served';
+
+                            // Replace the button with the text element
+                            servedButton.parentNode.replaceChild(servedText, servedButton);
+                        }
+                    });
+                } else {
+                    console.error("Undertaken orders data is missing.");
+                }
+            } catch (error) {
+                console.error("An error occurred while fetching undertaken orders:", error);
+            }
+        }
+        
+        
+        // Run the functions synchronously
+        async function runSynchronously() {
+            try {
+                await fetchServesByWaiters();
+                // These two functions will run one after the other
+                console.log("Both functions have completed.");
+            } catch (error) {
+                console.error("An error occurred:", error);
+            }
+        }
+        
+        // Call the function to run both tasks synchronously
+        runSynchronously();
+
+
+        function serve(orderId, button) {
+            // Send an AJAX request to update the serve status and insert into the served table
+            fetch(`/serve-food/${orderId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Replace the button with text "Served food"
+                        const servedText = document.createElement('span');
+                        servedText.textContent = 'Served';
+
+                        // Replace the button with the text element
+                        button.parentNode.replaceChild(servedText, button);
+                    } else {
+                        alert("Failed to serve the food.");
+                    }
+                });
+        }
+    </script>
+
+</body>
+</html>

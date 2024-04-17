@@ -1,8 +1,11 @@
 from flask import Flask, render_template, request
 import mysql.connector
+from intra import register_intra_routes
 
 
 app = Flask(__name__)
+
+
 
 # Set the secret key for the Flask application
 app.secret_key = 'RecipeHub'
@@ -10,14 +13,14 @@ app.secret_key = 'RecipeHub'
 # Database configuration
 db = mysql.connector.connect(
     host="localhost",
-    user="saleh",
-    password="saleh 1997@",
+    user="root",
+    password="",
     database="RecipeHub"
 )
 
 # Create a cursor to interact with the database
 cursor = db.cursor()
-
+register_intra_routes(app,cursor,db)
 
 @app.route("/")
 def home_form():
@@ -96,6 +99,9 @@ def reservation():
     # Return the success message as a simple string
     return message_display
 
+@app.route('/intra')
+def intra():
+    return render_template('home.html')
 
 
 if __name__ == "__main__":

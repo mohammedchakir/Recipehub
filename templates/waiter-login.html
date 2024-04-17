@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Waiter Login and Signup</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            width: 600px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        .side-panel {
+            width: 200px;
+            background-color: #333; /* Change the background color */
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            padding: 20px;
+        }
+
+        .side-panel a {
+            display: block;
+            color: #fff; /* Text color */
+            padding: 10px;
+            text-decoration: none;
+            transition: background-color 0.3s; /* Add a hover effect */
+        }
+
+        .side-panel a:hover {
+            background-color: #555; /* Change background color on hover */
+        }
+
+        .form-container {
+            width: 600px; /* Set a fixed width for the form container */
+            margin:  auto; /* Center the form container horizontally */
+            padding: 20px;
+            border: 1px solid #333;
+            border-radius: 10px;
+            margin-top: 20px; 
+        }
+
+        .error-message {
+            color: red;
+            font-weight: bold;
+        }
+
+        .good-message {
+            color: green;
+            font-weight: bold;
+        }
+
+        label, input {
+            display: block;
+            margin: 10px 0;
+        }
+
+        .btn {
+            background-color: #333;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: #555;
+        }
+
+        .confirmation {
+            color: green;
+            margin-top: 10px;
+        }
+        .login-signup-container {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .login-form,
+        .signup-form {
+            flex-basis: 45%; /* Adjust the width as needed */
+            padding: 20px; /* Add padding to the forms for spacing */
+        }
+
+        /* To give some space between the login and signup forms */
+        .login-form {
+            margin-right: 20px;
+        }
+
+        /* You can also add styling for the forms if needed */
+        .login-form form,
+        .signup-form form {
+            background-color: #f1f1f1;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 10px;
+        }
+        .label-address {
+            display: block;
+            margin: 10px 0;
+        }
+
+        /* Adjust the margin for the textarea to align it properly */
+        #address {
+            display: block;
+            margin: 10px 0;
+        }
+
+
+    </style>
+</head>
+<body>
+
+    <div class="side-panel">
+        <a href="/customer-login">Customer Login</a>
+        <a href="/chef-login">Chef Login</a>
+        <a href="/cashier-login">Cashier Login</a>
+        <a href="/waiter-login">Waiter Login</a>
+        <a href="/">Home page</a>
+    </div>
+
+    <div class="container form-container">
+        <div class="login-signup-container">
+            <div class="login-form">
+                <h2>Waiter Login</h2>
+                <form action="/waiter-login" method="post" onsubmit="return loginFormSubmit();">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" required>
+        
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
+        
+                    <input type="submit" class="btn" value="Login">
+                </form>
+                <div class="error-message">
+                    {% if error_message %}
+                    {{ error_message }}
+                    {% endif %}
+                </div>
+            </div>
+            <div class="signup-form">
+                <h2>Waiter Signup</h2>
+                <form action="/waiter-signup" method="post">
+                    <label for="newUsername">Username:</label>
+                    <input type="text" id="newUsername" name="newUsername" required>
+        
+                    <label for="newPassword">Password:</label>
+                    <input type="password" id="newPassword" name="newPassword" required>
+        
+                    <label for="mobileNumber">Mobile Number:</label>
+                    <input type="text" id="mobileNumber" name="mobileNumber" required>
+        
+                    <label for="fullName">Full Name:</label>
+                    <input type="text" id="fullName" name="fullName" required>
+
+                    <label for="address">Address:</label>
+                    <textarea id="address" name="address" rows="4" required></textarea>
+
+        
+                    <input type="submit" class="btn" value="Signup">
+                </form>
+                <div class="good-message">
+                    {% if good_message %}
+                    {{ good_message }}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="confirmation" id="confirmationMessage" style="display: none;">
+            <!-- Confirmation message will be displayed here -->
+        </div>
+    </div>
+
+    <!-- Your JavaScript for form submission and handling confirmation goes here -->
+</body>
+</html>

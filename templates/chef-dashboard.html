@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Chef Dashboard</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .side-panel {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            width: 280px; /* Wider side panel */
+            background-color: #3B5686; /* Darker background color */
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            padding: 20px;
+        }
+
+        .chef-image {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            width: 200px; /* Larger chef image */
+            height: 200px; /* Larger chef image */
+            border-radius: 50%; /* Make the chef image circular */
+        }
+
+        .side-panel a {
+            display: block;
+            color: #fff; /* Black text color */
+            padding: 10px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .side-panel a:hover {
+            background-color: #2D446C; /* Darker background on hover */
+        }
+
+        .main-content {
+            margin-left: 280px; /* Increase left margin to accommodate the wider side panel */
+            padding: 20px;
+        }
+
+        .main-content h2 {
+            font-weight: bold; /* Make the welcome message bold */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="side-panel">
+        <img src="{{url_for('static', filename='chef.JPG')}}" alt="Chef Image" class="chef-image">
+        <h5 class="text-white">Chef {{ user_details[0] }}</h5>
+        <a class="btn btn-primary btn-lg mb-3" href="/chef-dashboard">Dashboard</a>
+        <a class="btn btn-primary btn-lg mb-3" href="/check-awaiting-order">Check Awaiting Orders</a>
+        <a class="btn btn-danger btn-lg" href="/chef-sign-out">Sign Out</a>
+    </div>
+
+    <div class="main-content">
+        <div id="chef-dashboard">
+            <h2>Welcome, {{ user_details[0] }}</h2>
+            <ul class="list-group">
+                <li class="list-group-item"><strong>Full Name:</strong> {{ user_details[0] }}</li>
+                <li class="list-group-item"><strong>Mobile No:</strong> {{ user_details[1] }}</li>
+                <li class="list-group-item"><strong>Kitchen No:</strong> {{ user_details[2] }}</li>
+                <li class="list-group-item"><strong>Address:</strong> {{ user_details[3] }}</li>
+            </ul>
+            <!-- Your chef dashboard content goes here -->
+        </div>
+    </div>
+</body>
+
+</html>

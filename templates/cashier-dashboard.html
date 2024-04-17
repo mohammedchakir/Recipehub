@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Cashier Dashboard</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Additional custom styles */
+        .side-panel {
+            min-height: 100vh;
+            padding: 20px;
+            background: #FFA500; /* Orange background color */
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        .cashier-image {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin-bottom: 20px;
+        }
+
+        /* Style for side panel links */
+        .side-panel a {
+            color: black;
+            text-decoration: none;
+            display: block;
+            padding: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .side-panel a:hover {
+            background-color: #FF6347; /* Darker orange on hover */
+        }
+
+        /* Main content style */
+        .main-content {
+            padding: 20px;
+        }
+
+        /* Form style */
+        form {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column; /* Display forms vertically */
+            align-items: center;
+        }
+
+        input[type="number"] {
+            margin-bottom: 10px;
+        }
+
+        /* Account balance style */
+        h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3 side-panel">
+                <img src="{{url_for('static', filename='cashier.JPG')}}" alt="Cashier Image" class="cashier-image">
+                <h5>Cashier {{ cashier_details[0] }}</h5>
+                <a class="btn btn-warning btn-lg mb-3" href="/cashier-dashboard">Dashboard</a>
+                <a class="btn btn-warning btn-lg mb-3" href="/view-account-balance">Manage Account Balance</a>
+                <a class="btn btn-danger btn-lg" href="/cashier-sign-out">Sign Out</a>
+            </div>
+
+            <div class="col-md-9 main-content">
+                <div id="cashier-dashboard">
+                    <h2 class="dashboard-heading">Welcome, {{ cashier_details[0] }}</h2>
+                    <p><strong>Full Name:</strong> {{ cashier_details[0] }}</p>
+                    <p><strong>Mobile Number:</strong> {{ cashier_details[1] }}</p>
+                    <p><strong>Address:</strong> {{ cashier_details[2] }}</p>
+                    <!-- Your customer dashboard content goes here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

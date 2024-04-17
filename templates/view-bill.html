@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>View Bill</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Custom styles specific to this page */
+        .side-panel {
+            background-color: #ffa500; /* Change to your desired color */
+            height: 100vh;
+            padding: 20px;
+        }
+
+        .customer-image {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border: 3px solid #fff; /* Add a white border */
+            border-radius: 50%; /* Make the image round */
+        }
+
+        .main-content {
+            padding: 20px;
+        }
+
+        .bill-details {
+            background-color: #f8f9fa; /* Light gray background for the bill details */
+            padding: 20px;
+            border-radius: 5px; /* Add rounded corners to the bill details */
+        }
+
+        .bill-no {
+            font-size: 24px;
+            color: #007bff; /* Blue color for the bill number */
+        }
+
+        .total-cost {
+            font-size: 32px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .payment-form {
+            margin-top: 20px;
+        }
+
+        #card-element {
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+
+        #card-errors {
+            color: #dc3545; /* Red color for errors */
+        }
+
+        #pay-button {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #pay-button:hover {
+            background-color: #0056b3;
+        }
+        #bill_no1, #total_cost1 {
+            display: none;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3 side-panel">
+                <div class="text-center">
+                    <img src="{{url_for('static', filename='customer.png')}}" alt="Chef Image" class="img-fluid customer-image">
+                    <h5>Customer {{ user_details[0] }}</h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><a href="/customer-dashboard">Dashboard</a></li>
+                    <li class="list-group-item"><a href="/order-food">Order Food</a></li>
+                    <li class="list-group-item"><a href="/view-order">View your orders</a></li>
+                    <li class="list-group-item"><a href="/view-receipts">View Payment Receipts</a></li>
+                    <li class="list-group-item"><a href="/view-bill">View Bill</a></li>
+                    <li class="list-group-item"><a href="/sign-out">Sign Out</a></li>
+                </ul>
+            </div>
+
+            <div class="col-md-9 main-content">
+                <div class="bill-details">
+                    <h1 id="bill_no1">{{bill_no}}</h1>
+                    <h1 id="total_cost1">{{ total_cost }}</h1>
+                    <h1 class="bill-no" id="bill_no">Bill No: {{bill_no}}</h1>
+                    <h1 class="total-cost" id="total_cost">Total Amount to Pay: $ {{ total_cost }}</h1>
+                    
+                    <!-- Payment form -->
+                    <form id="payment-form" class="payment-form">
+                        <label for="card-element">Credit or Debit Card</label>
+                        <div id="card-element">
+                            <!-- A Stripe Element will be inserted here. -->
+                        </div>
+                        <!-- Used to display form errors. -->
+                        <div id="card-errors" role="alert"></div>
+                        
+                        <button id="pay-button" class="btn">Pay Now</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Include Stripe.js library -->
+    <script src="https://js.stripe.com/v3/"></script>
+    <!-- Add your custom JavaScript here for handling payments -->
+    <script>
+
+
+
+
+        // Initialize Stripe with your public API key
+        var stripe = Stripe("pk_test_51O3tLySCEMCjGc1MkjIRzAo49mpvWR5IXJd9OSotPBzZgBzx0XU0aKUjM7MMU1irTWukowdurAOaPUXTi1gAkgWi00I4qKITOZ");
+    
+        // Create an instance of Elements
+        var elements = stripe.elements();
+    
+        // Create a Card Element and mount it to the card-element div
+        var cardElement = elements.create('card');
+        cardElement.mount('#card-element');
+    
+        // Handle form submission
+        var form = document.getElementById('payment-form');
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+    
+            // Disable the Pay Now button to prevent multiple submissions
+            document.getElementById('pay-button').disabled = true;
+    
+            // Create a payment method using the card Element
+            stripe.createPaymentMethod({
+                type: 'card',
+                card: cardElement,
+            }).then(function(result) {
+                if (result.error) {
+                    // Show error message to the user
+                    var errorElement = document.getElementById('card-errors');
+                    errorElement.textContent = result.error.message;
+    
+                    // Re-enable the Pay Now button
+                    document.getElementById('pay-button').disabled = false;
+                } else {
+                    // Payment method created successfully, send the payment method ID to your server
+                    var paymentMethodId = result.paymentMethod.id;
+    
+                    // You can now submit the payment method ID to your server for payment processing
+                    sendPaymentToServer(paymentMethodId);
+    
+                    // After successful payment, you can redirect the user or show a success message
+                    window.location.href = '/payment-success';
+                }
+            });
+        });
+    
+        function sendPaymentToServer(paymentMethodId) {
+            // Send an AJAX request to undertake the order
+            const total_cost = parseInt(document.getElementById('total_cost1').textContent);
+            const bill_no = document.getElementById('bill_no1').textContent;
+            const data = {
+                paymentMethodId: paymentMethodId,
+                total_cost: total_cost,
+                bill_no: bill_no
+            };
+            fetch('/process-payment', {
+                method: 'POST',
+                body: new URLSearchParams(data),
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.clientSecret) {
+                    // Redirect to the payment success page
+                    window.location.href = '/payment-success';
+                } else {
+                    // Handle the error from the server
+                    var errorElement = document.getElementById('card-errors');
+                    errorElement.textContent = data.error;
+                    document.getElementById('pay-button').disabled = false;
+                }
+            });
+        }
+    
+    
+    </script>
+
+</body>
+
+</html>

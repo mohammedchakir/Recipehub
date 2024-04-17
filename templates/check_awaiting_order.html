@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Check Awaiting Order</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .side-panel {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            width: 280px; /* Wider side panel */
+            background-color: #5BC0DE; /* Blue background color */
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            padding: 20px;
+        }
+
+        .chef-image {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            width: 200px; /* Larger chef image */
+            height: 200px; /* Larger chef image */
+            border-radius: 50%; /* Make the chef image circular */
+        }
+
+
+        .side-panel a {
+            display: block;
+            color: #fff; /* Black text color */
+            padding: 10px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .side-panel a:hover {
+            background-color: #31B0D5; /* Darker background on hover */
+        }
+
+        .main-content {
+            margin-left: 280px; /* Increase left margin to accommodate the wider side panel */
+            padding: 20px;
+        }
+
+        .food-image {
+            max-width: 100px; /* Limit the food image width */
+            max-height: 100px; /* Limit the food image height */
+        }
+
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #f9f9f9;
+            border: 1px solid #ccc;
+            padding: 15px;
+            z-index: 1;
+        }
+
+        .undertake-order {
+            background-color: #5BC0DE;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .call-waiter-btn {
+            background-color: #31B0D5;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .accept-call {
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="side-panel">
+        <img src="{{url_for('static', filename='chef.JPG')}}" alt="Chef Image" class="chef-image">
+        <h5 class="text-white">Chef {{ user_details[0] }}</h5>
+        <a class="btn btn-primary btn-lg mb-3" href="/chef-dashboard">Dashboard</a>
+        <a class="btn btn-primary btn-lg mb-3" href="/check-awaiting-order">Check Awaiting Orders</a>
+        <a class="btn btn-danger btn-lg" href="/chef-sign-out">Sign Out</a>
+    </div>
+
+    <div class="main-content">
+        <h2>Orders Awaiting Your Attention</h2>
+        <table id="place-order-table" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Total Cost</th>
+                    <th>View in Detail</th>
+                    <th>Undertake Order</th>
+                    <th>Call Waiter</th>
+                    <th>Order Acceptance Status</th>
+                </tr>
+            </thead>
+            <tbody id="order-detail-table">
+                {% for order in order_details %}
+                <tr>
+                    <td>{{ order[0] }}</td>
+                    <td>${{ order[1] | string }}</td>
+                    <td><a href="#" onclick="viewOrderDetail('{{ order[0] }}')">View in Detail</a></td>
+                    <td><button class="undertake-order" onclick="undertakeOrder('{{ order[0] }}', this)">Undertake Order</button></td>
+                    <td><button id="call-{{ order[0] }}" class="call-waiter-btn" data-order-id="{{ order[0] }}" onclick="callWaiter('{{ order[0] }}', this)" style="display: none;">Call Waiter</button></td>
+                    <td class="accept-call" id="order-acceptance-status-{{ order[0] }}"></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- The pop-up div -->
+    <div id="order-detail-popup" class="popup">
+        <h3>Order Details</h3>
+        <table class="table table-striped">
+            <tr>
+                <th>Food</th>
+                <th>Quantity</th>
+                <th>Cost</th>
+            </tr>
+            <tr>
+                <td id="order-food"></td>
+                <td id="order-quantity"></td>
+                <td id="order-cost"></td>
+            </tr>
+        </table>
+        <button class="btn btn-secondary" onclick="closePopup()">Close</button>
+    </div>
+
+    <script>
+        const sessionChefUsername = "{{ session['username'] }}";
+        async function fetchCallsAcceptedByWaiters() {
+            try {
+                const response = await fetch('/get-calls-accepted-by-waiters');
+                const data = await response.json();
+    
+                if (data.acceptedCalls) {
+                    // Store the list of undertaken orders in the variable
+                    callsAcceptedByWaiters = data.acceptedCalls.map(order => order.order_id);
+                    console.log(callsAcceptedByWaiters);
+    
+                    // Check each order in the table
+                    const rows = document.querySelectorAll("#order-detail-table tr");
+                    rows.forEach(row => {
+                        const orderId = row.cells[1].textContent;
+                        if (callsAcceptedByWaiters.includes(orderId)) {
+                            // Order has been undertaken by a chef
+                            // Replace the "Undertake Order" button with text
+                            const undertakeOrderButton = row.querySelector(".undertake-order");
+                            undertakeOrderButton.style.display = 'none';
+                            const acceptCallButton = row.querySelector(".accept-call-btn");
+                            acceptCallButton.style.display='none';
+                            const waiterName = data.acceptedCalls.find(order => order.order_id === orderId).waiter_name;
+                            row.insertCell(5).textContent = '\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0Waiter\u00A0'+waiterName+'\u00A0is coming in your kitchen to take the order\u00A0';
+                            row.insertCell(2).textContent = 'Accepted';
+                        }
+                    });
+                } else {
+                    console.error("Accepted calls data is missing.");
+                }
+            } catch (error) {
+                console.error("An error occurred while fetching accepted calls:", error);
+            }
+        }
+        
+        
+        // Define a function to fetch orders undertaken by chefs
+        async function fetchOrdersUndertakenByChefs() {
+            try {
+                const response = await fetch('/get-orders-undertaken-by-chefs');
+                const data = await response.json();
+        
+                if (data.undertakenOrders) {
+                    // Store the list of undertaken orders in the variable
+                    ordersUndertakenByChefs = data.undertakenOrders.map(order => order.order_id);
+                    console.log(ordersUndertakenByChefs);
+        
+                    // Check each order in the table
+                    const rows = document.querySelectorAll("#order-detail-table tr");
+                    rows.forEach(row => {
+                        const orderId = row.cells[0].textContent;
+                        if (ordersUndertakenByChefs.includes(orderId)) {
+                            // Order has been undertaken by a chef
+                            // Replace the "Undertake Order" button with text
+                            const undertakeOrderButton = row.querySelector(".undertake-order");
+                            //undertakeOrderButton.style.display = 'none';
+                            const textNode = document.createTextNode("Order Undertaken");
+                            // Replace the "Undertake Order" button with the text node
+                            undertakeOrderButton.parentNode.replaceChild(textNode, undertakeOrderButton);
+                            row.insertCell(3).textContent = 'Order Undertaken ';
+                            const callWaiterButton = row.querySelector(".call-waiter-btn");
+                            callWaiterButton.style.display='block';
+                        }
+                    });
+                } else {
+                    console.error("Undertaken orders data is missing.");
+                }
+            } catch (error) {
+                console.error("An error occurred while fetching undertaken orders:", error);
+            }
+        }
+        
+        // Define a function to fetch calls by chefs
+        async function fetchCallsByChefs() {
+            try {
+                const response = await fetch('/get-calls-by-chefs');
+                const data = await response.json();
+        
+                if (data.calls) {
+                    // Store the list of undertaken orders in the variable
+                    callsByChefs = data.calls.map(order => order.order_id);
+                    console.log(callsByChefs);
+        
+                    // Check each order in the table
+                    const rows = document.querySelectorAll("#order-detail-table tr");
+                    rows.forEach(row => {
+                        const orderId = row.cells[0].textContent;
+                        if (callsByChefs.includes(orderId)) {
+                            // Order has been undertaken by a chef
+                            // Replace the "Call Waiter" button with text
+                            // const callButton = row.querySelector(".call-waiter-btn");
+                            // callButton.style.display = 'none';
+                            // row.insertCell(4).textContent = '\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0Waiter called';
+                            // Replace the "Call Waiter" button with text
+                            const callButton = row.querySelector(".call-waiter-btn");
+                            const textElement = document.createElement('span');
+                            textElement.textContent = 'Waiter called';
+                            callButton.parentNode.replaceChild(textElement, callButton);
+                            //row.replaceChild(textElement, callButton);
+        
+                        }
+                    });
+                } else {
+                    console.error("Calls data is missing.");
+                }
+            } catch (error) {
+                console.error("An error occurred while fetching calls by chefs:", error);
+            }
+        }
+        
+        // Run the functions synchronously
+        async function runSynchronously() {
+            try {
+                await fetchOrdersUndertakenByChefs();
+                await fetchCallsByChefs();
+                await fetchCallsAcceptedByWaiters() 
+                // These two functions will run one after the other
+                console.log("Both functions have completed.");
+            } catch (error) {
+                console.error("An error occurred:", error);
+            }
+        }
+        
+        // Call the function to run both tasks synchronously
+        runSynchronously();
+        
+        
+                function undertakeOrder(orderId, button) {
+                    // Send an AJAX request to undertake the order
+                    fetch(`/undertake-order/${orderId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === 'success') {
+                                //window.location.reload();
+                                // Replace the button with a text element
+                                const textElement = document.createElement('span');
+                                 textElement.textContent = 'Order Undertaken';
+                                 button.parentNode.replaceChild(textElement, button);
+                                 const callWaiterBtn=document.getElementById(`call-${orderId}`);
+                                 callWaiterBtn.style.display='block';
+                            } else {
+                                alert("Failed to undertake the order.");
+                            }
+                        });
+                }
+                function callWaiter(orderId, button) {
+                    // Send an AJAX request to undertake the order
+                    fetch(`/call-waiter/${orderId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === 'success') {
+                                // Replace the button with a text element
+                                const textElement = document.createElement('span');
+                                textElement.textContent = 'Waiter called';
+                                button.parentNode.replaceChild(textElement, button);
+                            } else {
+                                alert("Failed to Call the Waiter.");
+                            }
+                        });
+                }
+                function viewOrderDetail(orderId) {
+                    // Fetch order details via AJAX and display them in the pop-up
+                    fetch(`/get-order-detail/${orderId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            // 'data' should contain an array of orders with food, quantity, and cost
+                            // Display the details in the pop-up
+                            displayOrderDetailsInPopup(data);
+                        });
+                }
+            
+                function displayOrderDetailsInPopup(orders) {
+                    // Get a reference to the pop-up and the elements in the pop-up
+                    const popup = document.getElementById('order-detail-popup');
+                    const foodElement = document.getElementById('order-food');
+                    const quantityElement = document.getElementById('order-quantity');
+                    const costElement = document.getElementById('order-cost');
+            
+                    // Clear any existing content in the pop-up
+                    foodElement.textContent = '';
+                    quantityElement.textContent = '';
+                    costElement.textContent = '';
+            
+                    // Iterate over the array of orders and add each order to the pop-up
+                    orders.forEach(orderData => {
+                        const food = orderData.food;
+                        const quantity = orderData.quantity;
+                        const cost = orderData.cost;
+            
+                        // Create new rows for each order
+                        const foodRow = document.createElement('tr');
+                        const quantityRow = document.createElement('tr');
+                        const costRow = document.createElement('tr');
+            
+                        const foodCell = document.createElement('td');
+                        const quantityCell = document.createElement('td');
+                        const costCell = document.createElement('td');
+            
+                        // Set the text content for each cell
+                        foodCell.textContent = food;
+                        quantityCell.textContent = quantity;
+                        costCell.textContent = `$${cost}`;
+            
+                        // Append cells to their respective rows
+                        foodRow.appendChild(foodCell);
+                        quantityRow.appendChild(quantityCell);
+                        costRow.appendChild(costCell);
+            
+                        // Append rows to the table
+                        foodElement.appendChild(foodRow);
+                        quantityElement.appendChild(quantityRow);
+                        costElement.appendChild(costRow);
+                    });
+            
+                    // Show the pop-up
+                    popup.style.display = 'block';
+                }
+            
+                function closePopup() {
+                    // Hide the pop-up
+                    const popup = document.getElementById('order-detail-popup');
+                    popup.style.display = 'none';
+                }
+            </script>
+
+</body>
+
+</html>

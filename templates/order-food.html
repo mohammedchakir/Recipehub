@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Order Food</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .food-card {
+            width: 100%;
+            height: 100%;
+        }
+
+        .food-card .card-img-top {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            margin: 0 auto; /* Center the image horizontally */
+            display: block; /* Center the image vertically */
+        }
+
+        .food-card .card-body {
+            text-align: center; /* Center align card content */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Side Panel -->
+            <div class="col-3 bg-warning p-4">
+                <div class="text-center mb-3">
+                    <img src="{{url_for('static', filename='customer.png')}}" alt="Customer Image"
+                        class="img-fluid rounded-circle" style="width: 150px; height: 150px;">
+                    <h5>Customer {{ user_details[0] }}</h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><a href="/customer-dashboard">Dashboard</a></li>
+                    <li class="list-group-item"><a href="/order-food">Order Food</a></li>
+                    <li class="list-group-item"><a href="/view-order">View Your Orders</a></li>
+                    <li class="list-group-item"><a href="/view-receipts">View Payment Receipts</a></li>
+                    <li class="list-group-item"><a href="/view-bill">View Bill</a></li>
+                    <li class="list-group-item"><a href="/sign-out">Sign Out</a></li>
+                </ul>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-9 p-4">
+                <div id="customer-dashboard">
+                    <h2 class="display-4">Food Menu</h2>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card food-card">
+                                <img src="{{url_for('static', filename='cheeseburger.JPG')}}" alt="Cheese Burger"
+                                    class="card-img-top food-image">
+                                <div class="card-body">
+                                    <h5 class="card-title">Cheese Burger</h5>
+                                    <p class="card-text">Cost: $80</p>
+                                    <button class="btn btn-primary" onclick="addToOrder('Cheese Burger', 10)">Add to Order</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card food-card">
+                                <img src="{{url_for('static', filename='pizza.JPG')}}" alt="Pizza"
+                                    class="card-img-top food-image">
+                                <div class="card-body">
+                                    <h5 class="card-title">Pizza</h5>
+                                    <p class="card-text">Cost: $75</p>
+                                    <button class="btn btn-primary" onclick="addToOrder('Pizza', 15)">Add to Order</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card food-card">
+                                <img src="{{url_for('static', filename='jalebi.JPG')}}" alt="Jalebi"
+                                    class="card-img-top food-image">
+                                <div class="card-body">
+                                    <h5 class="card-title">Jalebi</h5>
+                                    <p class="card-text">Cost: $30</p>
+                                    <button class="btn btn-primary" onclick="addToOrder('Jalebi', 30)">Add to Order</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card food-card">
+                                <img src="{{url_for('static', filename='pastry.JPG')}}" alt="Pastry"
+                                    class="card-img-top food-image">
+                                <div class="card-body">
+                                    <h5 class="card-title">Pastry</h5>
+                                    <p class="card-text">Cost: $25</p>
+                                    <button class="btn btn-primary" onclick="addToOrder('Pastry', 25)">Add to Order</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card food-card">
+                                <img src="{{url_for('static', filename='pepsi.JPG')}}" alt="Pepsi"
+                                    class="card-img-top food-image">
+                                <div class="card-body">
+                                    <h5 class="card-title">Pepsi</h5>
+                                    <p class="card-text">Cost: $15</p>
+                                    <button class="btn btn-primary" onclick="addToOrder('Pepsi', 15)">Add to Order</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <table id="order-table" class="table mt-4">
+                        <thead>
+                            <tr>
+                                <th>Food Item</th>
+                                <th>Cost</th>
+                                <th>Quantity</th>
+                                <th>Total</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Order items will be added here -->
+                        </tbody>
+                    </table>
+                    <div id="total-cost">
+                        <h3>Total Cost: $0</h3>
+                    </div>
+                    <label for="table-no" class="mt-3">Table Number:</label>
+                    <input type="text" id="table-no" class="form-control" required>
+                    <br>
+                    <button class="btn btn-success mt-3" onclick="placeOrder()">Place Order</button>
+                    <!-- Your customer dashboard content goes here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        let selectedFood = null;
+        let selectedCost = 0;
+        let totalCost = 0;
+        let orderItems = [];
+
+        function showPopup(foodName, cost) {
+            selectedFood = foodName;
+            selectedCost = cost;
+            document.getElementById("food-name").innerText = "Food: " + foodName;
+            document.getElementById("food-cost").innerText = "Cost: $" + cost;
+            document.getElementById("food-popup").style.display = "block";
+        }
+
+        function addToOrder(foodName, cost) {
+            const quantity = 1; // Default quantity is 1 when adding items
+            let itemIndex = -1;
+
+            for (let i = 0; i < orderItems.length; i++) {
+                if (orderItems[i].food === foodName) {
+                    itemIndex = i;
+                    break;
+                }
+            }
+
+            if (itemIndex === -1) {
+                // If the item is not in the order, add a new row
+                const table = document.getElementById("order-table").getElementsByTagName('tbody')[0];
+                const row = table.insertRow();
+                const cell1 = row.insertCell(0);
+                const cell2 = row.insertCell(1);
+                const cell3 = row.insertCell(2);
+                const cell4 = row.insertCell(3);
+                const cell5 = row.insertCell(4);
+                cell1.innerHTML = foodName;
+                cell2.innerHTML = "$" + cost;
+                cell3.innerHTML = `<span id="${foodName}-quantity">${quantity}</span>`;
+                cell4.innerHTML = "$" + (cost * quantity);
+                cell5.innerHTML = `<button onclick="removeFromOrder('${foodName}', ${cost})">Remove</button>`;
+                const itemCost = cost * quantity;
+                orderItems.push({ food: foodName, quantity, total: itemCost });
+            } else {
+                // If the item is already in the order, update the quantity and total cost
+                const item = orderItems[itemIndex];
+                item.quantity += 1;
+                const quantitySpan = document.getElementById(`${foodName}-quantity`);
+                quantitySpan.innerText = item.quantity;
+                const itemCost = item.quantity * cost;
+                const totalCell = document.querySelector(`#order-table tbody tr:nth-child(${itemIndex + 1}) td:nth-child(4)`);
+                totalCell.innerText = "$" + itemCost;
+                item.total = itemCost;
+            }
+
+            totalCost += cost;
+            updateTotalCost();
+        }
+
+        function clearOrderTable() {
+            const table = document.getElementById("order-table").getElementsByTagName('tbody')[0];
+            while (table.hasChildNodes()) {
+                table.removeChild(table.firstChild);
+            }
+            document.getElementById("table-no").value=null;
+        }
+
+        // Call this function whenever you want to clear the order table
+
+
+        function removeFromOrder(foodName, cost) {
+            const itemIndex = orderItems.findIndex(item => item.food === foodName);
+            if (itemIndex !== -1) {
+                const item = orderItems[itemIndex];
+                if (item.quantity === 1) {
+                    // If the quantity is 1, remove the item from the order
+                    orderItems.splice(itemIndex, 1);
+                    const table = document.getElementById("order-table").getElementsByTagName('tbody')[0];
+                    table.deleteRow(itemIndex);
+                } else {
+                    // If the quantity is greater than 1, decrease the quantity and total cost
+                    item.quantity -= 1;
+                    const quantitySpan = document.getElementById(`${foodName}-quantity`);
+                    quantitySpan.innerText = item.quantity;
+                    const itemCost = item.quantity * cost;
+                    const totalCell = document.querySelector(`#order-table tbody tr:nth-child(${itemIndex + 1}) td:nth-child(4)`);
+                    totalCell.innerText = "$" + itemCost;
+                    item.total = itemCost;
+                }
+                totalCost -= cost;
+                updateTotalCost();
+            }
+        }
+
+        function updateOrderTable() {
+            const table = document.getElementById("order-table").getElementsByTagName("tbody")[0];
+            const tableno = document.getElementById("table-no").value.trim();
+
+            const orderData = [];
+
+            orderItems.forEach((item, index) => {
+                const food = item.food;
+                const quantity = item.quantity;
+                const total = item.total;
+                orderData.push({ food: food, quantity: quantity, total: total});
+            });
+            //console.log(orderData);
+
+
+            // Send the order data to your Flask app using an AJAX request
+            fetch('/process-order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ orderData: orderData, tableno: tableno }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert("Order placed successfully!");
+                } else {
+                    alert("Failed to place the order.");
+                }
+            });
+        }
+
+        function updateTotalCost() {
+            document.getElementById("total-cost").innerHTML = "<h3>Total Cost: $" + totalCost + "</h3>";
+        }
+
+        function closePopup() {
+            document.getElementById("food-popup").style.display = "none";
+            selectedFood = null;
+            selectedCost = 0;
+            document.getElementById("food-name").innerText = "";
+            document.getElementById("food-cost").innerText = "";
+            document.getElementById("quantity").value = "1";
+        }
+
+        function placeOrder() {
+            const tableNo = document.getElementById("table-no").value.trim();
+            if (!tableNo) {
+                alert("Please enter a valid Table Number.");
+                return;
+            }
+
+            if (orderItems.length > 0) {
+                updateOrderTable();
+                orderItems = [];
+                clearOrderTable();
+                totalCost = 0;
+                updateTotalCost();
+            } else {
+                alert("No items in the order.");
+            }
+        }
+
+    </script>
+</body>
+
+</html>

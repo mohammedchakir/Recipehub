@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>View order details</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Custom CSS styles */
+        .side-panel {
+            background-color: orange;
+            padding: 20px;
+            height: 100vh; /* Set the side panel to full viewport height */
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        .customer-image {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .main-content {
+            padding: 20px;
+        }
+
+        /* Style the table for better appearance */
+        .table th, .table td {
+            text-align: center;
+        }
+
+        .table th {
+            background-color: #f8f9fa; /* Light gray background for table headers */
+        }
+
+        /* Style the buttons */
+        .btn-primary, .btn-danger {
+            padding: 5px 15px;
+        }
+
+        /* Style the pop-up */
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            border: 1px solid #ccc;
+            padding: 15px;
+            z-index: 1;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3 side-panel">
+                <div class="text-center">
+                    <img src="{{url_for('static', filename='customer.png')}}" alt="Chef Image" class="img-fluid rounded-circle customer-image">
+                    <h5>Customer {{ user_details[0] }}</h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><a href="/customer-dashboard">Dashboard</a></li>
+                    <li class="list-group-item"><a href="/order-food">Order Food</a></li>
+                    <li class="list-group-item"><a href="/view-order">View your orders</a></li>
+                    <li class="list-group-item"><a href="/view-receipts">View Payment Receipts</a></li>
+                    <li class="list-group-item"><a href="/view-bill">View Bill</a></li>
+                    <li class="list-group-item"><a href="/sign-out">Sign Out</a></li>
+                </ul>
+            </div>
+
+            <div class="col-md-9 main-content">
+                <h2>Order Details</h2>
+                <table id="place-order-table" class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Total Cost</th>
+                            <th>View in Detail</th>
+                            <th colspan="2">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="order-detail-table">
+                        {% for order in order_details %}
+                        <tr>
+                            <td>{{ order[0] }}</td>
+                            <td>${{ order[1] | string }}</td>
+                            <td><a href="#" class="btn btn-primary" onclick="viewOrderDetail('{{ order[0] }}')">View</a></td>
+                            <td><button class="btn btn-danger" onclick="cancelOrder(this)">Cancel</button></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="order-detail-popup" class="popup">
+        <h3 class="text-center mb-3">Order Details</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Food</th>
+                    <th>Quantity</th>
+                    <th>Cost</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td id="order-food"></td>
+                    <td id="order-quantity"></td>
+                    <td id="order-cost"></td>
+                </tr>
+            </tbody>
+        </table>
+        <button class="btn btn-primary" onclick="closePopup()">Close</button>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Add your custom JavaScript here -->
+    <script>
+        let ordersUndertakenByChefs = [];
+
+        async function fetchOrdersUndertakenByChefs() {
+            try {
+                const response = await fetch('/get-orders-undertaken-by-chefs');
+                const data = await response.json();
+        
+                if (data.undertakenOrders) {
+                    // Store the list of undertaken orders in the variable
+                    ordersUndertakenByChefs = data.undertakenOrders.map(order => order.order_id);
+                    console.log(ordersUndertakenByChefs);
+        
+                    // Check each order in the table
+                        const rows = document.querySelectorAll("#order-detail-table tr");
+                        rows.forEach(row => {
+                            const orderId = row.cells[0].textContent;
+                            if (ordersUndertakenByChefs.includes(orderId)) {
+                                // Order has been undertaken by a chef
+                                // Replace the "Cancel Order" button with text
+                                const cancelOrderButton = row.querySelector("button");
+                                const chefName = data.undertakenOrders.find(order => order.order_id === orderId).chef_name;
+                                cancelOrderButton.style.display = 'none';
+                                row.insertCell(3).textContent = 'Undertaken by Chef '+chefName;
+                            }
+                        });
+                } else {
+                    console.error("Undertaken orders data is missing.");
+                }
+            } catch (error) {
+                console.error("An error occurred while fetching undertaken orders:", error);
+            }
+        }
+
+        async function fetchOrdersServedByWaiters() {
+            try {
+                const response = await fetch('/get-orders-served-by-waiters');
+                const data = await response.json();
+        
+                if (data.servedOrders) {
+                    // Store the list of undertaken orders in the variable
+                    ordersServedByWaiters = data.servedOrders.map(order => order.order_id);
+                    console.log(ordersServedByWaiters);
+        
+                    // Check each order in the table
+                    const rows = document.querySelectorAll("#order-detail-table tr");
+                    rows.forEach(row => {
+                        const orderId = row.cells[0].textContent;
+                        if (ordersServedByWaiters.includes(orderId)) {
+                            // Order has been undertaken by a chef
+                            // Replace the "Undertake Order" button with text
+                            // const undertakeOrderButton = row.querySelector(".undertake-order");
+                            // undertakeOrderButton.style.display = 'none';
+                            const waiterName = data.servedOrders.find(order => order.order_id === orderId).waiter_name;
+                            row.insertCell(4).textContent = ' Served by Waiter ' + waiterName;
+                        }
+                    });
+                } else {
+                    console.error("Served orders data is missing.");
+                }
+            } catch (error) {
+                console.error("An error occurred while fetching served orders:", error);
+            }
+        }
+        // Run the functions synchronously
+        async function runSynchronously() {
+            try {
+                await fetchOrdersUndertakenByChefs();
+                await fetchOrdersServedByWaiters();
+                // These two functions will run one after the other
+                console.log("Both functions have completed.");
+            } catch (error) {
+                console.error("An error occurred:", error);
+            }
+        }
+        
+        // Call the function to run both tasks synchronously
+        runSynchronously();
+        // Fetch orders undertaken by chefs when the page loads
+        //fetchOrdersUndertakenByChefs();
+
+
+        function cancelOrder(button) {
+                // Get the parent row of the button
+                const row = button.parentNode.parentNode;
+
+                // Extract the order ID from the first cell of the row
+                const orderId = row.cells[0].textContent;
+
+                // Send an AJAX request to cancel the order
+                fetch(`/cancel-order/${orderId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            // Remove the row from the table
+                            row.remove();
+                            //alert("Order deleted successfully.")
+                        } else {
+                            alert("Failed to cancel the order.");
+                        }
+                    });
+        }
+
+        function removeOrderFromTable(orderId) {
+            // Find the table row with the corresponding order ID and remove it
+            const rowToRemove = document.querySelector(`#order-detail-table tr[data-order-id="${orderId}"]`);
+            if (rowToRemove) {
+                rowToRemove.remove();
+            }
+        }
+        function viewOrderDetail(orderId) {
+            // Fetch order details via AJAX and display them in the pop-up
+            fetch(`/get-order-detail/${orderId}`)
+                .then(response => response.json())
+                .then(data => {
+                    // 'data' should contain an array of orders with food, quantity, and cost
+                    // Display the details in the pop-up
+                    displayOrderDetailsInPopup(data);
+                });
+        }
+    
+        function displayOrderDetailsInPopup(orders) {
+            // Get a reference to the pop-up and the elements in the pop-up
+            const popup = document.getElementById('order-detail-popup');
+            const foodElement = document.getElementById('order-food');
+            const quantityElement = document.getElementById('order-quantity');
+            const costElement = document.getElementById('order-cost');
+    
+            // Clear any existing content in the pop-up
+            foodElement.textContent = '';
+            quantityElement.textContent = '';
+            costElement.textContent = '';
+    
+            // Iterate over the array of orders and add each order to the pop-up
+            orders.forEach(orderData => {
+                const food = orderData.food;
+                const quantity = orderData.quantity;
+                const cost = orderData.cost;
+    
+                // Create new rows for each order
+                const foodRow = document.createElement('tr');
+                const quantityRow = document.createElement('tr');
+                const costRow = document.createElement('tr');
+    
+                const foodCell = document.createElement('td');
+                const quantityCell = document.createElement('td');
+                const costCell = document.createElement('td');
+    
+                // Set the text content for each cell
+                foodCell.textContent = food;
+                quantityCell.textContent = quantity;
+                costCell.textContent = `$${cost}`;
+    
+                // Append cells to their respective rows
+                foodRow.appendChild(foodCell);
+                quantityRow.appendChild(quantityCell);
+                costRow.appendChild(costCell);
+    
+                // Append rows to the table
+                foodElement.appendChild(foodRow);
+                quantityElement.appendChild(quantityRow);
+                costElement.appendChild(costRow);
+            });
+    
+            // Show the pop-up
+            popup.style.display = 'block';
+        }
+    
+        function closePopup() {
+            // Hide the pop-up
+            const popup = document.getElementById('order-detail-popup');
+            popup.style.display = 'none';
+        }
+    </script>
+
+</body>
+</html>

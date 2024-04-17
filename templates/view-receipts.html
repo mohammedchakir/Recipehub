@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>View Receipts</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Custom styles specific to this page */
+        .side-panel {
+            background-color: #ffa500; /* Change to your desired color */
+            height: 100vh;
+            padding: 20px;
+        }
+
+        .customer-image {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border: 3px solid #fff; /* Add a white border */
+            border-radius: 50%; /* Make the image round */
+        }
+
+        .main-content {
+            padding: 20px;
+        }
+
+        .receipt-table {
+            background-color: #f8f9fa; /* Light gray background for the table */
+        }
+
+        .receipt-table th, .receipt-table td {
+            text-align: center;
+        }
+
+        .receipt-download {
+            color: #007bff; /* Blue color for the download link */
+            text-decoration: none;
+        }
+
+        .receipt-download:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3 side-panel">
+                <div class="text-center">
+                    <img src="{{url_for('static', filename='customer.png')}}" alt="Chef Image" class="img-fluid customer-image">
+                    <h5>Customer {{ user_details[0] }}</h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><a href="/customer-dashboard">Dashboard</a></li>
+                    <li class="list-group-item"><a href="/order-food">Order Food</a></li>
+                    <li class="list-group-item"><a href="/view-order">View your orders</a></li>
+                    <li class="list-group-item"><a href="/view-receipts">View Payment Receipts</a></li>
+                    <li class="list-group-item"><a href="/view-bill">View Bill</a></li>
+                    <li class="list-group-item"><a href="/sign-out">Sign Out</a></li>
+                </ul>
+            </div>
+
+            <div class="col-md-9 main-content">
+                <h2>Payment Receipts</h2>
+                <table class="table table-bordered receipt-table">
+                    <thead>
+                        <tr>
+                            <th>Bill No</th>
+                            <th>Total Cost</th>
+                            <th>Download Receipt</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for receipt in receipts %}
+                        <tr>
+                            <td>{{ receipt[0] }}</td>
+                            <td>${{ receipt[1] | string }}</td>
+                            <td><a href="{{ url_for('download_receipt', bill_no=receipt[0]) }}" target="_blank" class="receipt-download">Download Receipt</a></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Add your custom JavaScript here -->
+</body>
+
+</html>

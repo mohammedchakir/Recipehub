@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>View Calls</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Add CSS styles for the side panel */
+        .side-panel {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            width: 250px; /* Increased width */
+            background: linear-gradient(135deg, #87CEEB, #00BFFF); /* Gradient background */
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            padding: 20px;
+            box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .waiter-image {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px; /* Adjust the spacing as needed */
+            width: 150px;
+            height: 150px;
+            border-radius: 50%; /* Make the image circular */
+        }
+
+        /* Style for side panel links */
+        .side-panel a {
+            display: block;
+            color: #fff; /* White text color */
+            padding: 10px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .side-panel a:hover {
+            background-color: #0099CC; /* Lighter blue on hover */
+        }
+
+        /* Custom button styles */
+        .custom-btn {
+            background-color: #007BFF; /* Custom primary color */
+            color: #fff;
+            padding: 12px 20px;
+        }
+
+        .custom-btn-danger {
+            background-color: #DC3545; /* Custom danger color */
+        }
+
+        /* Adjust margin for the main content */
+        .main-content {
+            margin-left: 280px; /* Increase left margin to accommodate the wider side panel */
+            padding: 20px;
+        }
+        
+    </style>
+</head>
+
+<body>
+    <div class="side-panel">
+        <img src="{{url_for('static', filename='waiter.JPG')}}" alt="Waiter Image" class="waiter-image">
+        <h5 class="text-white">Waiter {{ waiter_details[0] }}</h5>
+        <a class="custom-btn" href="/waiter-dashboard">Dashboard</a>
+        <a class="custom-btn" href="/view-calls">View Chef Calls</a>
+        <a class="custom-btn" href="/waiter-serves">Serve Food</a>
+        <a class="custom-btn custom-btn-danger" href="/waiter-sign-out">Sign Out</a>
+    </div>
+
+    <div class="main-content">
+        <h2 class="text-dark">Calls by Chefs</h2>
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Kitchen No.</th>
+                    <th>Order ID</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="order-detail-table">
+                {% for call in call_details %}
+                <tr>
+                    <td>{{ call[0] }}</td>
+                    <td>{{ call[1] }}</td>
+                    <td>
+                        <button class="accept-call-btn" onclick="acceptCall('{{ call[1] }}', this)">Accept</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+
+
+    <script>
+        async function fetchCallsAcceptedByWaiters() {
+            try {
+                const response = await fetch('/get-calls-accepted-by-waiters');
+                const data = await response.json();
+    
+                if (data.acceptedCalls) {
+                    // Store the list of undertaken orders in the variable
+                    callsAcceptedByWaiters = data.acceptedCalls.map(order => order.order_id);
+                    console.log(callsAcceptedByWaiters);
+    
+                    // Check each order in the table
+                    const rows = document.querySelectorAll("#order-detail-table tr");
+                    rows.forEach(row => {
+                        const orderId = row.cells[1].textContent;
+                        if (callsAcceptedByWaiters.includes(orderId)) {
+                            // Order has been undertaken by a chef
+                            // Replace the "Undertake Order" button with text
+                            const undertakeOrderButton = row.querySelector(".undertake-order");
+                            undertakeOrderButton.style.display = 'none';
+                            const acceptCallButton = row.querySelector(".accept-call-btn");
+                            acceptCallButton.style.display='none';
+                            const waiterName = data.acceptedCalls.find(order => order.order_id === orderId).waiter_name;
+                            row.insertCell(5).textContent = '\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0Waiter\u00A0'+waiterName+'\u00A0is coming in your kitchen to take the order\u00A0';
+                            row.insertCell(2).textContent = 'Accepted';
+                        }
+                    });
+                } else {
+                    console.error("Accepted calls data is missing.");
+                }
+            } catch (error) {
+                console.error("An error occurred while fetching accepted calls:", error);
+            }
+        }
+    
+        // Call the function to fetch accepted calls when the page loads
+        fetchCallsAcceptedByWaiters();
+    
+        // Define a function to accept a call by a chef
+        function acceptCall(orderId, button) {
+    // Send an AJAX request to accept the call
+    fetch(`/accept-call/${orderId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Replace the button with "Accepted"
+                button.style.display='none';
+                button.textContent = 'Accepted';
+                button.disabled = true; // Disable the button to prevent multiple clicks
+                const textElement = document.createElement('span');
+                const waiterName = "{{ waiter_details[0] }}"; // Replace with actual waiter name variable
+                textElement.textContent = `Accepted by ${waiterName}`;
+                button.parentNode.replaceChild(textElement, button);
+            } else {
+                alert("Failed to accept the call.");
+            }
+        });
+}
+    </script>
+    
+</body>
+
+</html>

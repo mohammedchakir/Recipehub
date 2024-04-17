@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Manage Account</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Additional custom styles */
+        .side-panel {
+            min-height: 100vh;
+            padding: 20px;
+            background: #FFA500; /* Orange background color */
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        .cashier-image {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin-bottom: 20px;
+        }
+
+        /* Style for side panel links */
+        .side-panel a {
+            color: black;
+            text-decoration: none;
+            display: block;
+            padding: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .side-panel a:hover {
+            background-color: #FF6347; /* Darker orange on hover */
+        }
+
+        /* Main content style */
+        .main-content {
+            padding: 20px;
+        }
+
+        /* Form style */
+        form {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column; /* Display forms vertically */
+            align-items: center;
+        }
+
+        input[type="number"] {
+            margin-bottom: 10px;
+        }
+
+        /* Account balance style */
+        h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3 side-panel">
+                <img src="{{url_for('static', filename='cashier.JPG')}}" alt="Cashier Image" class="cashier-image">
+                <h5>Cashier {{ cashier_details[0] }}</h5>
+                <a class="btn btn-warning btn-lg mb-3" href="/cashier-dashboard">Dashboard</a>
+                <a class="btn btn-warning btn-lg mb-3" href="/view-account-balance">Manage Account Balance</a>
+                <a class="btn btn-danger btn-lg" href="/cashier-sign-out">Sign Out</a>
+            </div>
+
+            <div class="col-md-9 main-content">
+                <div id="account-balance">
+                    <h1>Account Balance: $ {{balance}}</h1>
+                </div>
+
+                <form id="deposit-form" action="/deposit" method="POST">
+                    <div class="form-group">
+                        <input type="number" id="deposit-amount" name="deposit_amount" class="form-control" placeholder="Amount to deposit">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Deposit Money</button>
+                </form>
+
+                <form id="withdraw-form" action="/withdraw" method="POST">
+                    <div class="form-group">
+                        <input type="number" id="withdraw-amount" name "withdraw_amount" class="form-control" placeholder="Amount to withdraw">
+                    </div>
+                    <button type="submit" class="btn btn-danger">Withdraw Money</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('deposit-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const depositAmount = document.getElementById('deposit-amount').value;
+            console.log(depositAmount)
+            // Make a POST request to the /deposit route
+            fetch('/deposit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({ 'deposit_amount': depositAmount })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message === "Amount deposited successfully") {
+                    alert(data.message);location.reload();
+                    // Optionally, update the balance displayed on the page
+                    //document.getElementById('account-balance').textContent = "Account Balance: $ " + data.new_balance;
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                alert("An error occurred: " + error);
+            });
+        });
+        document.getElementById('withdraw-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const withdrawAmount = document.getElementById('withdraw-amount').value;
+
+            // Make a POST request to the /withdraw route
+            fetch('/withdraw', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({ 'withdraw_amount': withdrawAmount })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                if (data.message === "Amount Withdrawn successfully") {
+                    alert(data.message);
+                    location.reload();
+                    // Optionally, update the balance displayed on the page
+                    //document.getElementById('account-balance').textContent = "Account Balance: $ " + data.new_balance;
+                } else {
+                    alert(data.message);
+                    location.reload();
+                }
+            })
+            .catch(error => {
+                alert("An error occurred:" + error);
+            });
+        });
+    </script>
+    
+</body>
+
+</html>

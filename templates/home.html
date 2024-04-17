@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Role Selection</title>
+    <style>
+        body {
+            background-image: url('../static/rest3.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-position: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            text-align: center;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .role-option {
+            background-color: orange;
+            color: #FFF;
+            border: 2px solid #0056b3;
+            padding: 20px;
+            margin: 10px;
+            border-radius: 10px;
+            display: inline-block;
+            min-width: 200px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .role-option:hover {
+            background-color: #0056b3;
+        }
+
+        h1, h2 {
+            color: #FFF;
+            text-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5); /* Text shadow for improved visibility */
+        }
+        h3 {
+            color: #FFF;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Text shadow for improved visibility */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Welcome to the Restaurant</h1>
+        <h2>Please select your role:</h2>
+        <div class="role-option" onclick="window.location.href = 'customer-login';">
+            <h3>Customer</h3>
+        </div>
+        <div class="role-option" onclick="window.location.href = 'chef-login';">
+            <h3>Chef</h3>
+        </div>
+        <div class="role-option" onclick="window.location.href = 'waiter-login';">
+            <h3>Waiter</h3>
+        </div>
+        <div class="role-option" onclick="window.location.href = 'cashier-login';">
+            <h3>Cashier</h3>
+        </div>
+    </div>
+</body>
+
+</html>
