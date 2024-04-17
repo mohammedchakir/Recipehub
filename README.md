@@ -1,6 +1,5 @@
 # RecipeHub
 
-![Icon](https://example.com/icon.png)
 
 ## Introduction
 
@@ -8,8 +7,10 @@ Welcome to RecipeHub! RecipeHub is a full-stack web application developed as the
 
 RecipeHub is built using Flask for the backend, MySQL for the database, and HTML, Ajax, and jQuery for the frontend.
 
-Visit the deployed site: [RecipeHub](https://reciphub.pythonanywhere.com/)
 [recording.webm](https://github.com/mohammedchakir/Recipehub/assets/36488900/9781499f-c242-4ee6-8848-ff7f1a4d8943)
+
+Visit the deployed site: [RecipeHub](https://reciphub.pythonanywhere.com/)
+
 
 Check out our final project blog article: [Blog Article](https://www.blogger.com/blog/post/edit/preview/3322922446122045835/1015185131249697797)
 
