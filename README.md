@@ -33,7 +33,7 @@ To run RecipeHub locally, follow these steps:
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/Elmouinysaleh/recipehub.git
+   git clone https://github.com/mohammedchakir/Recipehub.git
    ```
 
 2. Install dependencies:
@@ -42,9 +42,37 @@ To run RecipeHub locally, follow these steps:
    pip install -r requirements.txt
    ```
 
-3. Set up the MySQL database and configure the connection in `config.py`.
+3. Set up the MySQL database and configure the connection in `app.py`.
+   ## Database Setup
 
-4. Run the Flask application:
+To set up the database for RecipeHub using phpMyAdmin and MySQL, follow these steps:
+
+### 1. Create Database
+
+1. Log in to phpMyAdmin.
+2. Click on the "Databases" tab.
+3. Enter `recipehub` as the database name and click "Create".
+
+### 2. Import Script File
+
+1. Select the `recipehub` database from the left sidebar.
+2. Click on the "Import" tab in the top menu.
+3. Choose the `recipehub.sql` script file provided in the repository.
+4. Click "Go" to import the script file and create the database schema.
+
+### 3. Update Database Configuration (Optional)
+
+If you're using a database configuration file in your project, such as `config.py`, you may need to update it with the database connection details. However, since you're using phpMyAdmin directly, this step may not be necessary.
+
+### 4. Run the Application
+
+Once you've completed the import step, you're ready to run the RecipeHub application. If you're using Flask, navigate to the project directory and execute the following command:
+
+```bash
+python app.py
+
+
+5. Run the Flask application:
 
    ```bash
    python app.py
@@ -65,9 +93,6 @@ To run RecipeHub locally, follow these steps:
 
 Contributions are welcome! If you'd like to contribute to RecipeHub, please fork the repository and submit a pull request with your changes.
 
-## Related Projects
-
-- [Another Awesome Project](https://github.com/anotheruser/awesome-project)
 
 ## Support
 
